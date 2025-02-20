@@ -1,0 +1,138 @@
+public class EffortSubmission
+{
+    public Payload d { get; set; }
+}
+
+public class Payload
+{
+    public string Begda { get; set; }  // Begin Date
+    public string Endda { get; set; }  // End Date
+    public string Pernr { get; set; }  // Employee ID
+    public List<ProjectEffort> IT_PROJ_EFFORTS { get; set; } = new();
+    public List<TrainingEffort> IT_TRAINING { get; set; } = new();
+    public List<NonProjectEffort> IT_NONPROJ { get; set; } = new();
+}
+
+public class ProjectEffort
+{
+    public string Pernr { get; set; }
+    public string Country { get; set; } = "IN";
+    public string Location { get; set; } = "";
+    public List<ProjectDetail> IT_PROJ_DETAILS { get; set; } = new();
+}
+
+public class ProjectDetail
+{
+    public string Pernr { get; set; }
+    public string Projectname { get; set; }
+    public string Projectefforts { get; set; }
+    public List<ProjectTask> IT_TASKS { get; set; } = new();
+}
+
+public class ProjectTask
+{
+    public string WbsElement { get; set; }
+    public string Employee { get; set; }
+    public string TaskId { get; set; }
+    public string Comments { get; set; } = "";
+    public string StartDate { get; set; }
+    public string EndDate { get; set; }
+    public string TaskDescription { get; set; }
+    public string Efforts { get; set; }
+}
+
+public class TrainingEffort
+{
+    public string Pernr { get; set; }
+    public string Begda { get; set; }
+    public string Endda { get; set; }
+}
+
+public class NonProjectEffort
+{
+    public string Pernr { get; set; }
+    public string TaskDesc { get; set; }
+    public string TaskId { get; set; }
+    public string TaskType { get; set; }
+    public string Efforts { get; set; }
+}
+
+
+
+
+
+
+public async Task<string> GenerateEffortJson(DateTime beginDate, DateTime endDate)
+{
+    var activities = await _repository.GetUserActivities(beginDate, endDate);
+
+    var groupedByUser = activities.GroupBy(a => a.UserID).Select(userGroup => new EffortSubmission
+    {
+        d = new Payload
+        {
+            Begda = beginDate.ToString("yyyy-MM-dd"),
+            Endda = endDate.ToString("yyyy-MM-dd"),
+            Pernr = userGroup.Key.ToString(),
+            IT_PROJ_EFFORTS = userGroup.Select(ug => new ProjectEffort
+            {
+                Pernr = ug.UserID.ToString(),
+                IT_PROJ_DETAILS = new List<ProjectDetail>
+                {
+                    new ProjectDetail
+                    {
+                        Pernr = ug.UserID.ToString(),
+                        Projectname = ug.ActivityDetails,  // Assuming project name is stored in ActivityDetails
+                        Projectefforts = ug.Efforts.ToString("0.00"),
+                        IT_TASKS = new List<ProjectTask>
+                        {
+                            new ProjectTask
+                            {
+                                WbsElement = ug.ActivityDetails, // Assuming WBS is stored here
+                                Employee = ug.UserID.ToString(),
+                                TaskId = "A001",
+                                StartDate = ug.LoginDate.ToString("yyyyMMdd"),
+                                EndDate = ug.LogoutDate.ToString("yyyyMMdd"),
+                                TaskDescription = "Cross Functional Support Efforts",
+                                Efforts = ug.Efforts.ToString("0.00")
+                            }
+                        }
+                    }
+                }
+            }).ToList()
+        }
+    }).ToList();
+
+    return System.Text.Json.JsonSerializer.Serialize(groupedByUser, new JsonSerializerOptions { WriteIndented = true });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+public async Task SendEffortDataToApi(DateTime beginDate, DateTime endDate, string apiUrl)
+{
+    string jsonPayload = await GenerateEffortJson(beginDate, endDate);
+
+    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+    var response = await _httpClient.PostAsync(apiUrl, content);
+    response.EnsureSuccessStatusCode();
+}
+
+
+
+
+
+[HttpPost("submit-efforts")]
+public async Task<IActionResult> SubmitEfforts([FromQuery] DateTime beginDate, [FromQuery] DateTime endDate)
+{
+    string apiUrl = "https://your-api-endpoint.com"; // Replace with actual API URL
+    await _service.SendEffortDataToApi(beginDate, endDate, apiUrl);
+    return Ok("Effort data submitted successfully.");
+}
