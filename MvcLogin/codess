@@ -136,3 +136,76 @@ public async Task<IActionResult> SubmitEfforts([FromQuery] DateTime beginDate, [
     await _service.SendEffortDataToApi(beginDate, endDate, apiUrl);
     return Ok("Effort data submitted successfully.");
 }
+
+
+
+
+
+
+{
+    "d": {
+        "Begda": "2025-02-17",
+        "Endda": "2025-02-23",
+        "Pernr": "00011421",
+        "Retmessage": ""
+    },
+    "IT_PROJ_EFFORTS": [
+        {
+            "Pernr": "00011421",
+            "Country": "IN",
+            "Location": "",
+            "IT_PROJ_DETAILS": [
+                {
+                    "Pernr": "00011421",
+                    "Projectname": "18965/P03/B02/580",
+                    "Projectefforts": "2.00",
+                    "IT_TASKS": [
+                        {
+                            "WbsElement": "18965/P03/B02/580",
+                            "Employee": "00011421",
+                            "TaskId": "A001",
+                            "Comments": "",
+                            "StartDate": "2025-02-18",
+                            "EndDate": "2025-02-18",
+                            "TaskDescription": "Cross Functional Support Efforts",
+                            "Efforts": "2.00"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "IT_TRAINING": [
+        {
+            "Pernr": "00011421",
+            "Begda": "2025-02-18",
+            "Endda": "2025-02-18",
+            "Priox": ""
+        }
+    ],
+    "IT_NONPROJ": [
+        {
+            "Pernr": "00011421",
+            "TaskDesc": "marketing & communication",
+            "TaskId": "TA01",
+            "TaskType": "",
+            "Comments": "",
+            "Efforts": "2.00"
+        }
+    ],
+    "Workdate": "2025-02-18",
+    "MODIF_FLAG": "Y",
+    "Loc1": "Home",
+    "Loc2": "",
+    "IT_OVERTIME": [],
+    "Stext": "",
+    "Locat": "",
+    "Istaf": "",
+    "Extern": "",
+    "Comments": "",
+    "Histo": "",
+    "Kkost": "0.00",
+    "Ndays": "0",
+    "Nhours": "1.00",
+    "Objid": "00000000"
+}
