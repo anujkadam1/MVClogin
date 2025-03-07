@@ -209,3 +209,55 @@ public async Task<IActionResult> SubmitEfforts([FromQuery] DateTime beginDate, [
     "Nhours": "1.00",
     "Objid": "00000000"
 }
+
+
+
+
+function bindPagingAndSorting() {
+    var table = new DataTable('#grd_approve', {
+        layout: {
+            bottomEnd: {
+                paging: {
+                    firstLast: false
+                }
+            }
+        },
+        columnDefs: [
+            { orderable: false, targets: 0 } // Disables sorting for the first column (checkbox)
+        ]
+    });
+
+    var checkedRows = {}; // Store checkbox states per page
+
+    // Handle "Check All" functionality
+    $('#CheckBox_all').on('change', function () {
+        var isChecked = $(this).prop('checked');
+        var pageIndex = table.page(); // Get current page index
+
+        // Store checkbox state for the current page
+        checkedRows[pageIndex] = isChecked;
+
+        // Check/uncheck only checkboxes on the current page
+        $('#grd_approve tbody input[type="checkbox"]').each(function () {
+            $(this).prop('checked', isChecked);
+        });
+    });
+
+    // Handle individual checkbox selection
+    $('#grd_approve tbody').on('change', 'input[type="checkbox"]', function () {
+        var pageIndex = table.page();
+        var allChecked = $('#grd_approve tbody input[type="checkbox"]').length === 
+                         $('#grd_approve tbody input[type="checkbox"]:checked').length;
+
+        checkedRows[pageIndex] = allChecked; // Update page-wise state
+        $('#CheckBox_all').prop('checked', allChecked);
+    });
+
+    // Restore "Check All" state when the page changes
+    table.on('draw', function () {
+        var pageIndex = table.page();
+        var isChecked = checkedRows[pageIndex] || false; // Default false if not stored
+
+        $('#CheckBox_all').prop('checked', isChecked);
+    });
+}
